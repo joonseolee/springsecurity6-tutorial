@@ -16,23 +16,8 @@ class SecurityConfig {
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .authorizeHttpRequests { it.anyRequest().authenticated() }
-            .formLogin {
-                it
-                    .loginPage("/loginPage")
-                    .loginProcessingUrl("/loginProc")
-                    .defaultSuccessUrl("/", true)
-                    .failureUrl("/failed")
-                    .usernameParameter("userId")
-                    .passwordParameter("passwd")
-                    .successHandler { _, response, authentication ->
-                        println("authenticated: $authentication")
-                        response!!.sendRedirect("/home")
-                    }
-                    .failureHandler { _, response, exception ->
-                        println("exception: ${exception.message}")
-                        response.sendRedirect("/login")
-                    }
-                    .permitAll()
+            .httpBasic {
+                it.authenticationEntryPoint(CustomAuthenticationEntryPoint())
             }
 
         return http.build()
