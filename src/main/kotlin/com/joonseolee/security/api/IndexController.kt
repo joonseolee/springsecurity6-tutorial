@@ -5,9 +5,18 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class IndexController {
-
     @GetMapping
     fun index(): String {
         return "index"
+    }
+
+    @GetMapping("/loginPage")
+    fun loginPage(): String {
+        return "loginPage"
+    }
+
+    @GetMapping("/home")
+    fun home(): String {
+        return "home"
     }
 }
