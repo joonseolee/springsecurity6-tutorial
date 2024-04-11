@@ -2,6 +2,7 @@ package com.joonseolee.security.api
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.core.userdetails.User
@@ -16,23 +17,15 @@ class SecurityConfig {
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .authorizeHttpRequests { it.anyRequest().authenticated() }
-            .formLogin {
+            .formLogin(Customizer.withDefaults())
+            .rememberMe {
                 it
-                    .loginPage("/loginPage")
-                    .loginProcessingUrl("/loginProc")
-                    .defaultSuccessUrl("/", true)
-                    .failureUrl("/failed")
-                    .usernameParameter("userId")
-                    .passwordParameter("passwd")
-                    .successHandler { _, response, authentication ->
-                        println("authenticated: $authentication")
-                        response!!.sendRedirect("/home")
-                    }
-                    .failureHandler { _, response, exception ->
-                        println("exception: ${exception.message}")
-                        response.sendRedirect("/login")
-                    }
-                    .permitAll()
+                    .alwaysRemember(true)
+                    .tokenValiditySeconds(3600)
+                    .userDetailsService(userDetailsService())
+                    .rememberMeParameter("remember-pa")
+                    .rememberMeCookieName("remember-co")
+                    .key("security123")
             }
 
         return http.build()
