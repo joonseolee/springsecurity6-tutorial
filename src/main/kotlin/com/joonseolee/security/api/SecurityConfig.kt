@@ -2,6 +2,7 @@ package com.joonseolee.security.api
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.core.userdetails.User
@@ -15,24 +16,17 @@ class SecurityConfig {
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
-            .authorizeHttpRequests { it.anyRequest().authenticated() }
-            .formLogin {
+            .authorizeHttpRequests {
                 it
-                    .loginPage("/loginPage")
-                    .loginProcessingUrl("/loginProc")
-                    .defaultSuccessUrl("/", true)
-                    .failureUrl("/failed")
-                    .usernameParameter("userId")
-                    .passwordParameter("passwd")
-                    .successHandler { _, response, authentication ->
-                        println("authenticated: $authentication")
-                        response!!.sendRedirect("/home")
-                    }
-                    .failureHandler { _, response, exception ->
-                        println("exception: ${exception.message}")
-                        response.sendRedirect("/login")
-                    }
-                    .permitAll()
+                    .requestMatchers("/anonymous").hasRole("GUEST")
+                    .requestMatchers("/anonymousContext", "/authentication").permitAll()
+                    .anyRequest().authenticated()
+            }
+            .formLogin(Customizer.withDefaults())
+            .anonymous {
+                it
+                    .principal("guest")
+                    .authorities("ROLE_GUEST")
             }
 
         return http.build()
