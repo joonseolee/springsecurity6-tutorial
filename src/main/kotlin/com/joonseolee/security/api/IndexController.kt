@@ -19,4 +19,9 @@ class IndexController {
     fun home(): String {
         return "home"
     }
+
+    @GetMapping("/logoutSuccess")
+    fun logoutSuccess(): String {
+        return "logoutSuccess"
+    }
 }
