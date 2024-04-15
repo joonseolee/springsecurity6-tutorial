@@ -8,31 +8,29 @@ import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.provisioning.InMemoryUserDetailsManager
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache
 
 @EnableWebSecurity
 @Configuration
 class SecurityConfig {
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
+        val requestCache = HttpSessionRequestCache()
+        requestCache.setMatchingRequestParameterName("customParam=y")
+
         http
             .authorizeHttpRequests { it.anyRequest().authenticated() }
             .formLogin {
                 it
-                    .loginPage("/loginPage")
-                    .loginProcessingUrl("/loginProc")
-                    .defaultSuccessUrl("/", true)
-                    .failureUrl("/failed")
-                    .usernameParameter("userId")
-                    .passwordParameter("passwd")
-                    .successHandler { _, response, authentication ->
-                        println("authenticated: $authentication")
-                        response!!.sendRedirect("/home")
+                    .successHandler { request, response, _ ->
+                        val savedRequest = requestCache.getRequest(request, response)
+                        val redirectUrl = savedRequest.redirectUrl
+                        response.sendRedirect(redirectUrl)
                     }
-                    .failureHandler { _, response, exception ->
-                        println("exception: ${exception.message}")
-                        response.sendRedirect("/login")
-                    }
-                    .permitAll()
+            }
+            .requestCache {
+                it
+                    .requestCache(requestCache)
             }
 
         return http.build()
