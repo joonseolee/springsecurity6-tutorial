@@ -1,12 +1,17 @@
 package com.joonseolee.security.api
 
+import com.joonseolee.security.service.SecurityContextService
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-class IndexController {
+class IndexController(
+    private val securityContextService: SecurityContextService
+) {
     @GetMapping
     fun index(): String {
+        println(securityContextService.getSecurityContext())
+
         return "index"
     }
 
