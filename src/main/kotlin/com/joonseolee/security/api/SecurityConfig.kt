@@ -2,7 +2,6 @@ package com.joonseolee.security.api
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
@@ -16,6 +15,11 @@ import org.springframework.security.web.SecurityFilterChain
 class SecurityConfig {
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
+        // 방법 1
+//        val builder = http.getSharedObject(AuthenticationManagerBuilder::class.java)
+//        builder.authenticationProvider(CustomAuthenticationProvider())
+//        builder.authenticationProvider(CustomAuthenticationProvider2())
+
         http
             .authorizeHttpRequests {
                 it
@@ -23,6 +27,9 @@ class SecurityConfig {
                     .anyRequest().authenticated()
             }
             .formLogin(Customizer.withDefaults())
+            // 방법 2
+            .authenticationProvider(CustomAuthenticationProvider())
+            .authenticationProvider(CustomAuthenticationProvider2())
 
         return http.build()
     }
