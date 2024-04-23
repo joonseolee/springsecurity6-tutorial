@@ -24,4 +24,14 @@ class IndexController(
     fun home(): String {
         return "home"
     }
+
+    @GetMapping("/invalidSessionUrl")
+    fun invalidSessionUrl(): String {
+        return "invalidSessionUrl"
+    }
+
+    @GetMapping("/expiredUrl")
+    fun expiredUrl(): String {
+        return "expiredUrl"
+    }
 }

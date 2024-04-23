@@ -23,6 +23,13 @@ class SecurityConfig {
                     .anyRequest().authenticated()
             }
             .formLogin(Customizer.withDefaults())
+            .sessionManagement {
+                it
+                    .invalidSessionUrl("/invalidSessionUrl")
+                    .maximumSessions(1)
+                    .maxSessionsPreventsLogin(false)
+                    .expiredUrl("/expiredUrl")
+            }
 
         return http.build()
     }
