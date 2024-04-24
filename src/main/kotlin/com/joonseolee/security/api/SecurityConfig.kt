@@ -6,6 +6,7 @@ import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
+import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.provisioning.InMemoryUserDetailsManager
@@ -25,6 +26,7 @@ class SecurityConfig {
             .formLogin(Customizer.withDefaults())
             .sessionManagement {
                 it
+                    .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
                     .invalidSessionUrl("/invalidSessionUrl")
                     .maximumSessions(1)
                     .maxSessionsPreventsLogin(false)
