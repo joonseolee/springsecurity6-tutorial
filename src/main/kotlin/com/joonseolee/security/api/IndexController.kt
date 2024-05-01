@@ -6,13 +6,20 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class IndexController(
-    private val securityContextService: SecurityContextService
+    private val securityContextService: SecurityContextService,
+    private val sessionInfoService: SessionInfoService,
 ) {
     @GetMapping
     fun index(): String {
         println(securityContextService.getSecurityContext())
 
         return "index"
+    }
+
+    @GetMapping("/sessionInfo")
+    fun session(): String {
+        sessionInfoService.sessionInfo()
+        return "sessionInfo"
     }
 
     @GetMapping("/loginPage")

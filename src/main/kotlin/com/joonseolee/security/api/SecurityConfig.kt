@@ -2,11 +2,12 @@ package com.joonseolee.security.api
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
+import org.springframework.security.core.session.SessionRegistry
+import org.springframework.security.core.session.SessionRegistryImpl
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.provisioning.InMemoryUserDetailsManager
@@ -28,7 +29,7 @@ class SecurityConfig {
                 it
                     .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
                     .invalidSessionUrl("/invalidSessionUrl")
-                    .maximumSessions(1)
+                    .maximumSessions(2)
                     .maxSessionsPreventsLogin(false)
                     .expiredUrl("/expiredUrl")
             }
@@ -48,5 +49,10 @@ class SecurityConfig {
                 .roles("USER").build()
 
         return InMemoryUserDetailsManager(user)
+    }
+
+    @Bean
+    fun sessionRegistry(): SessionRegistry {
+        return SessionRegistryImpl()
     }
 }
