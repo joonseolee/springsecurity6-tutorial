@@ -2,7 +2,6 @@ package com.joonseolee.security.api
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
@@ -19,10 +18,24 @@ class SecurityConfig {
         http
             .authorizeHttpRequests {
                 it
-                    .requestMatchers("/").permitAll()
+                    .requestMatchers("/login").permitAll()
+                    .requestMatchers("/admin").hasRole("ADMIN")
                     .anyRequest().authenticated()
             }
             .formLogin(Customizer.withDefaults())
+            .exceptionHandling {
+                it
+                    .authenticationEntryPoint { _, response, authException ->
+                        println("exception -> ${authException!!.message}")
+                        response!!.sendRedirect("/login")
+                    }
+                    // 아래것을 테스트하기위해서는 authenticationEntryPoint 을 주석처리해야한다.
+                    // 왜냐 상관은 없는데 login 페이지를 별도로 만들지않았기떄문에 권한별 테스트하기가 현재 구조에서는 어렵기때문
+                    .accessDeniedHandler { _, response, accessDeniedException ->
+                        println("access exception -> ${accessDeniedException!!.message}")
+                        response!!.sendRedirect("/denied")
+                    }
+            }
 
         return http.build()
     }

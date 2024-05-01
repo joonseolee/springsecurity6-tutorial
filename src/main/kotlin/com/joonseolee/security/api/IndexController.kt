@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class IndexController(
-    private val securityContextService: SecurityContextService
+    private val securityContextService: SecurityContextService,
 ) {
     @GetMapping
     fun index(): String {
@@ -23,5 +23,15 @@ class IndexController(
     @GetMapping("/home")
     fun home(): String {
         return "home"
+    }
+
+    @GetMapping("/login")
+    fun login(): String {
+        return "login"
+    }
+
+    @GetMapping("/denied")
+    fun denied(): String {
+        return "denied"
     }
 }
