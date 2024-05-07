@@ -19,8 +19,13 @@ class SecurityConfig {
         http
             .authorizeHttpRequests {
                 it
-                    .requestMatchers("/").permitAll()
+                    .requestMatchers("/csrf").permitAll()
+                    .requestMatchers("/ignoreCsrf").permitAll()
                     .anyRequest().authenticated()
+            }
+            .csrf {
+                it
+                    .ignoringRequestMatchers("/ignoreCsrf")
             }
             .formLogin(Customizer.withDefaults())
 
