@@ -10,15 +10,19 @@ import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.provisioning.InMemoryUserDetailsManager
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository
 
 @EnableWebSecurity
 @Configuration
 class SecurityConfig {
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
+        val cookieCsrfTokenRepository = CookieCsrfTokenRepository()
+
         http
             .authorizeHttpRequests {
                 it
+                    .requestMatchers("/csrf").permitAll()
                     .requestMatchers("/csrf").permitAll()
                     .requestMatchers("/ignoreCsrf").permitAll()
                     .anyRequest().authenticated()
@@ -26,6 +30,7 @@ class SecurityConfig {
             .csrf {
                 it
                     .ignoringRequestMatchers("/ignoreCsrf")
+                    .csrfTokenRepository(cookieCsrfTokenRepository)
             }
             .formLogin(Customizer.withDefaults())
 
