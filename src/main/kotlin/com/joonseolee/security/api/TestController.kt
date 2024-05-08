@@ -2,6 +2,7 @@ package com.joonseolee.security.api
 
 import com.joonseolee.security.service.SecurityContextService
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -48,4 +49,7 @@ class TestController(
     fun post(): String {
         return "post"
     }
+
+    @GetMapping("/user/{name}")
+    fun userName(@PathVariable name: String): String = "userName - $name"
 }

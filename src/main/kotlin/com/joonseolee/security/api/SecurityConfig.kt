@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.provisioning.InMemoryUserDetailsManager
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager
 import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher
 import org.springframework.security.web.util.matcher.RegexRequestMatcher
@@ -33,6 +34,8 @@ class SecurityConfig {
                     .requestMatchers(AntPathRequestMatcher("/manager/**")).hasAuthority("ROLE_MANAGER")
                     .requestMatchers(MvcRequestMatcher(introspector, "/admin/payment")).hasAuthority("ROLE_ADMIN")
                     .requestMatchers(RegexRequestMatcher("/resource/[A-Za-z0-9]+", null)).hasAuthority("ROLE_MANAGER")
+                    .requestMatchers("/user/{name}").access(WebExpressionAuthorizationManager("#name == authentication.name"))
+                    .requestMatchers("/admin/db").access(WebExpressionAuthorizationManager("hasAuthority('ROLE_DB') OR hasAuthority('ROLE_ADMIN')"))
                     .anyRequest().authenticated()
             }
             .formLogin(Customizer.withDefaults())
