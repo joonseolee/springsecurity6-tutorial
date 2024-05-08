@@ -48,4 +48,14 @@ class IndexController(
             csrfToken2 = ${csrfToken2.token}
         """.trimIndent()
     }
+
+    @PostMapping("/formCsrf")
+    fun formCsrf(csrfToken: CsrfToken): CsrfToken {
+        return csrfToken
+    }
+
+    @PostMapping("/cookieCsrf")
+    fun cookieCsrf(csrfToken: CsrfToken): CsrfToken {
+        return csrfToken
+    }
 }
