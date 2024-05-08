@@ -10,19 +10,37 @@ import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.provisioning.InMemoryUserDetailsManager
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository
 
 @EnableWebSecurity
 @Configuration
 class SecurityConfig {
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
+        val cookieCsrfTokenRepository = CookieCsrfTokenRepository()
+        val spaCsrfTokenRequestHandler = SpaCsrfTokenRequestHandler()
+
         http
             .authorizeHttpRequests {
                 it
-                    .requestMatchers("/").permitAll()
+                    .requestMatchers("/csrf").permitAll()
+                    .requestMatchers("/csrfToken").permitAll()
+                    .requestMatchers("/form").permitAll()
+                    .requestMatchers("/formCsrf").permitAll()
+                    .requestMatchers("/cookie").permitAll()
+                    .requestMatchers("/cookieCsrf").permitAll()
+                    .requestMatchers("/ignoreCsrf").permitAll()
                     .anyRequest().authenticated()
             }
+            .csrf {
+                it
+                    .ignoringRequestMatchers("/ignoreCsrf")
+                    .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                    .csrfTokenRequestHandler(spaCsrfTokenRequestHandler)
+            }
             .formLogin(Customizer.withDefaults())
+            .addFilterBefore(CsrfCookieFilter(), BasicAuthenticationFilter::class.java)
 
         return http.build()
     }
