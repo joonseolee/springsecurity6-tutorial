@@ -27,34 +27,14 @@ class SecurityConfig {
         return http.build()
     }
 
-    @Bean
-    @Order(1)
-    fun securityFilterChain2(http: HttpSecurity): SecurityFilterChain {
-        http
-            .securityMatchers {
-                it
-                    .requestMatchers("/api/**", "/oauth/**")
-            }
-            .authorizeHttpRequests {
-                it
-                    .anyRequest().permitAll()
-            }
-            .formLogin(Customizer.withDefaults())
-
-        return http.build()
-    }
-
     /**
      * 해당 빈이 있을경우 application.yml 파일보다 우선순위가 높다
      */
     @Bean
     fun userDetailsService(): UserDetailsService {
-        val user =
-            User
-                .withUsername("user")
-                .password("{noop}1111")
-                .roles("USER").build()
-
-        return InMemoryUserDetailsManager(user)
+        val user = User.withUsername("user").password("{noop}1111").roles("USER").build()
+        val db = User.withUsername("db").password("{noop}1111").roles("DB").build()
+        val admin = User.withUsername("admin").password("(noop}1111").roles("ADMIN", "SECURE").build()
+        return InMemoryUserDetailsManager(user, db, admin)
     }
 }

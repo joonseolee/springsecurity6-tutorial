@@ -31,9 +31,6 @@ class IndexController(
         return "custom"
     }
 
-    @GetMapping("/user/{name}")
-    fun userName(@PathVariable name: String): String = name
-
     @GetMapping("/admin/db")
     fun admin(): String {
         return "admin"
