@@ -1,5 +1,6 @@
 package com.joonseolee.security.api
 
+import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
@@ -10,6 +11,7 @@ import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.provisioning.InMemoryUserDetailsManager
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.access.expression.DefaultHttpSecurityExpressionHandler
 import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager
 import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher
@@ -23,7 +25,14 @@ class SecurityConfig {
     fun securityFilterChain(
         http: HttpSecurity,
         introspector: HandlerMappingIntrospector,
+        context: ApplicationContext
     ): SecurityFilterChain {
+        val expressionHandler = DefaultHttpSecurityExpressionHandler()
+        expressionHandler.setApplicationContext(context)
+        val authorizationManager =
+            WebExpressionAuthorizationManager("@customWebSecurity.check(authentication, request)")
+        authorizationManager.setExpressionHandler(expressionHandler)
+
         http
             .authorizeHttpRequests {
                 it
@@ -36,6 +45,8 @@ class SecurityConfig {
                     .requestMatchers(RegexRequestMatcher("/resource/[A-Za-z0-9]+", null)).hasAuthority("ROLE_MANAGER")
                     .requestMatchers("/user/{name}").access(WebExpressionAuthorizationManager("#name == authentication.name"))
                     .requestMatchers("/admin/db").access(WebExpressionAuthorizationManager("hasAuthority('ROLE_DB') OR hasAuthority('ROLE_ADMIN')"))
+                    .requestMatchers("/custom/**").access(authorizationManager)
+                    .requestMatchers(CustomRequestMatcher("/admin")).hasAuthority("ROLE_ADMIN")
                     .anyRequest().authenticated()
             }
             .formLogin(Customizer.withDefaults())

@@ -52,4 +52,7 @@ class TestController(
 
     @GetMapping("/user/{name}")
     fun userName(@PathVariable name: String): String = "userName - $name"
+
+    @GetMapping("/custom")
+    fun custom(): String = "custom"
 }
