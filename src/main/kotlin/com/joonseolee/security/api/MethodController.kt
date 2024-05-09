@@ -1,36 +1,34 @@
 package com.joonseolee.security.api
 
-import org.springframework.data.jpa.domain.AbstractPersistable_.id
-import org.springframework.security.access.prepost.PostAuthorize
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
+import java.util.function.Function
+import java.util.stream.Collectors
+
 
 @RestController
-class MethodController {
+class MethodController(
+    private val dataService: DataService
+) {
 
-    @GetMapping("/admin")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    fun admin(): String = "admin"
+    @PostMapping("/writeList")
+    fun writeList(@RequestBody data: List<Account>): List<Account> = dataService.writeList(data)
 
-    @GetMapping("/user")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
-    fun user(): String = "user"
+    @PostMapping("/writeMap")
+    fun writeMap(@RequestBody data: List<Account>): Map<String, Account> {
+        val accountMap = data.stream().collect(Collectors.toMap(Account::owner, Function.identity()))
+        return dataService.writeMap(accountMap)
+    }
 
-    @GetMapping("/isAuthenticated")
-    @PreAuthorize("isAuthenticated")
-    fun isAuthenticated(): String = "isAuthenticated"
+    @GetMapping("/readList")
+    fun readList(): List<Account> {
+        return dataService.readList()
+    }
 
-    @GetMapping("/user/{id}")
-    @PreAuthorize("#id == authentication.name")
-    fun authentication(@PathVariable id: String): String = id
-
-    @GetMapping("/owner")
-    @PostAuthorize("returnObject.owner == authentication.name")
-    fun owner(name: String): Account = Account(name, false)
-
-    @GetMapping("/isSecure")
-    @PostAuthorize("hasAuthority('ROLE_ADMIN') AND returnObject.secure")
-    fun isSecure(name: String, secure: String): Account = Account(name, "Y" == secure)
+    @GetMapping("/readMap")
+    fun readMap(): Map<String, Account> {
+        return dataService.readMap()
+    }
 }
