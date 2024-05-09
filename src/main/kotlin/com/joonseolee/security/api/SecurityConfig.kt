@@ -2,6 +2,7 @@ package com.joonseolee.security.api
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.annotation.Order
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -19,8 +20,24 @@ class SecurityConfig {
         http
             .authorizeHttpRequests {
                 it
-                    .requestMatchers("/").permitAll()
                     .anyRequest().authenticated()
+            }
+            .formLogin(Customizer.withDefaults())
+
+        return http.build()
+    }
+
+    @Bean
+    @Order(1)
+    fun securityFilterChain2(http: HttpSecurity): SecurityFilterChain {
+        http
+            .securityMatchers {
+                it
+                    .requestMatchers("/api/**", "/oauth/**")
+            }
+            .authorizeHttpRequests {
+                it
+                    .anyRequest().permitAll()
             }
             .formLogin(Customizer.withDefaults())
 
