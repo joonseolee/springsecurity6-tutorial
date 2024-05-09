@@ -2,6 +2,7 @@ package com.joonseolee.security.api
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.annotation.Order
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -19,7 +20,6 @@ class SecurityConfig {
         http
             .authorizeHttpRequests {
                 it
-                    .requestMatchers("/").permitAll()
                     .anyRequest().authenticated()
             }
             .formLogin(Customizer.withDefaults())
@@ -32,12 +32,9 @@ class SecurityConfig {
      */
     @Bean
     fun userDetailsService(): UserDetailsService {
-        val user =
-            User
-                .withUsername("user")
-                .password("{noop}1111")
-                .roles("USER").build()
-
-        return InMemoryUserDetailsManager(user)
+        val user = User.withUsername("user").password("{noop}1111").roles("USER").build()
+        val db = User.withUsername("db").password("{noop}1111").roles("DB").build()
+        val admin = User.withUsername("admin").password("(noop}1111").roles("ADMIN", "SECURE").build()
+        return InMemoryUserDetailsManager(user, db, admin)
     }
 }
