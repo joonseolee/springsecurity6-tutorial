@@ -15,6 +15,7 @@ import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.provisioning.InMemoryUserDetailsManager
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager
 
 @EnableMethodSecurity(securedEnabled = true, jsr250Enabled = true)
 @EnableWebSecurity
@@ -26,8 +27,9 @@ class SecurityConfig {
             .authorizeHttpRequests {
                 it
                     .requestMatchers("/user").hasRole("USER")
-                    .requestMatchers("/db").hasRole("DB")
+                    .requestMatchers("/db").access(WebExpressionAuthorizationManager("hasRole('DB')"))
                     .requestMatchers("/admin").hasRole("ADMIN")
+                    .requestMatchers("/secure").access(CustomAuthorizationManager())
                     .anyRequest().authenticated()
             }
             .formLogin(Customizer.withDefaults())
@@ -54,15 +56,10 @@ class SecurityConfig {
      */
     @Bean
     fun userDetailsService(): UserDetailsService {
-        val user = User.withUsername("user").password("{noop}1111").authorities("MYPREFIX_USER").build()
-        val db = User.withUsername("db").password("{noop}1111").authorities("MYPREFIX_DB").build()
-        val admin = User.withUsername("admin").password("{noop}1111").authorities("MYPREFIX_ADMIN", "MYPREFIX_SECURE").build()
-        val nom = User.withUsername("nom").password("{noop}1111").authorities("MYPREFIX_ADMIN", "MYPREFIX_SECURE").build()
+        val user = User.withUsername("user").password("{noop}1111").roles("USER").build()
+        val db = User.withUsername("db").password("{noop}1111").roles("DB").build()
+        val admin = User.withUsername("admin").password("{noop}1111").roles("ADMIN", "SECURE").build()
+        val nom = User.withUsername("nom").password("{noop}1111").roles("ADMIN", "SECURE").build()
         return InMemoryUserDetailsManager(user, db, admin, nom)
-    }
-
-    @Bean
-    fun grantedAuthorityDefaults(): GrantedAuthorityDefaults {
-        return GrantedAuthorityDefaults("MYPREFIX_")
     }
 }

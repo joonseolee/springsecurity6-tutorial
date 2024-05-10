@@ -60,4 +60,7 @@ class IndexController(
     fun adminP(): String {
         return "adminP"
     }
+
+    @GetMapping("/secure")
+    fun secure(): String = "secure"
 }
