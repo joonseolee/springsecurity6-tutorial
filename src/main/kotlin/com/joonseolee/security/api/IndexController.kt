@@ -45,4 +45,19 @@ class IndexController(
     fun oauth(): String {
         return "oauth"
     }
+
+    @GetMapping("/user")
+    fun user(): String {
+        return "user"
+    }
+
+    @GetMapping("/db")
+    fun db(): String {
+        return "db"
+    }
+
+    @GetMapping("/admin")
+    fun adminP(): String {
+        return "adminP"
+    }
 }

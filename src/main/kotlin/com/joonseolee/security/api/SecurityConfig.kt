@@ -3,6 +3,8 @@ package com.joonseolee.security.api
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
@@ -22,7 +24,10 @@ class SecurityConfig {
         http
             .authorizeHttpRequests {
                 it
-                    .anyRequest().permitAll()
+                    .requestMatchers("/user").hasRole("USER")
+                    .requestMatchers("/db").hasRole("DB")
+                    .requestMatchers("/admin").hasRole("ADMIN")
+                    .anyRequest().authenticated()
             }
             .formLogin(Customizer.withDefaults())
             .csrf {
@@ -31,6 +36,16 @@ class SecurityConfig {
             }
 
         return http.build()
+    }
+
+    @Bean
+    fun roleHierarchy(): RoleHierarchy {
+        return RoleHierarchyImpl().apply {
+            setHierarchy("ROLE_ADMIN > ROLE_DB\n" +
+                "ROLE_DB > ROLE_USER\n" +
+                "ROLE_USER > ROLE_ANONYMOUS"
+            )
+        }
     }
 
     /**
