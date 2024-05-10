@@ -1,5 +1,10 @@
 package com.joonseolee.security.api
 
+import jakarta.annotation.security.DenyAll
+import jakarta.annotation.security.PermitAll
+import jakarta.annotation.security.RolesAllowed
+import org.springframework.security.access.annotation.Secured
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -13,22 +18,31 @@ class MethodController(
     private val dataService: DataService
 ) {
 
-    @PostMapping("/writeList")
-    fun writeList(@RequestBody data: List<Account>): List<Account> = dataService.writeList(data)
+    @GetMapping("/user")
+    @Secured("ROLE_USER")
+    fun user(): String = "user"
 
-    @PostMapping("/writeMap")
-    fun writeMap(@RequestBody data: List<Account>): Map<String, Account> {
-        val accountMap = data.stream().collect(Collectors.toMap(Account::owner, Function.identity()))
-        return dataService.writeMap(accountMap)
-    }
+    @GetMapping("/admin")
+    @RolesAllowed("ADMIN")
+    fun admin(): String = "admin"
 
-    @GetMapping("/readList")
-    fun readList(): List<Account> {
-        return dataService.readList()
-    }
+    @GetMapping("/permitAll")
+    @PermitAll
+    fun permitAll(): String = "permitAll"
 
-    @GetMapping("/readMap")
-    fun readMap(): Map<String, Account> {
-        return dataService.readMap()
-    }
+    @GetMapping("/denyAll")
+    @DenyAll
+    fun denyAll(): String = "denyAll"
+
+    @GetMapping("/isAdmin")
+    @IsAdmin
+    fun isAdmin(): String = "isAdmin"
+
+    @GetMapping("/ownerShip")
+    @OwnerShip
+    fun ownerShip(name: String): Account = Account(name, false)
+
+    @GetMapping("/delete")
+    @PreAuthorize("@myAuthorizer.isUser(#root)")
+    fun delete(): String = "delete"
 }
