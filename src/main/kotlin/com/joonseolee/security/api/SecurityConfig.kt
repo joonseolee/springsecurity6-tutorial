@@ -10,6 +10,7 @@ import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
+import org.springframework.security.config.core.GrantedAuthorityDefaults
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.provisioning.InMemoryUserDetailsManager
@@ -41,9 +42,9 @@ class SecurityConfig {
     @Bean
     fun roleHierarchy(): RoleHierarchy {
         return RoleHierarchyImpl().apply {
-            setHierarchy("ROLE_ADMIN > ROLE_DB\n" +
-                "ROLE_DB > ROLE_USER\n" +
-                "ROLE_USER > ROLE_ANONYMOUS"
+            setHierarchy("MYPREFIX_ADMIN > MYPREFIX_DB\n" +
+                "MYPREFIX_DB > MYPREFIX_USER\n" +
+                "MYPREFIX_USER > MYPREFIX_ANONYMOUS"
             )
         }
     }
@@ -53,10 +54,15 @@ class SecurityConfig {
      */
     @Bean
     fun userDetailsService(): UserDetailsService {
-        val user = User.withUsername("user").password("{noop}1111").roles("USER").build()
-        val db = User.withUsername("db").password("{noop}1111").roles("DB").build()
-        val admin = User.withUsername("admin").password("{noop}1111").roles("ADMIN", "SECURE").build()
-        val nom = User.withUsername("nom").password("{noop}1111").roles("ADMIN", "SECURE").build()
+        val user = User.withUsername("user").password("{noop}1111").authorities("MYPREFIX_USER").build()
+        val db = User.withUsername("db").password("{noop}1111").authorities("MYPREFIX_DB").build()
+        val admin = User.withUsername("admin").password("{noop}1111").authorities("MYPREFIX_ADMIN", "MYPREFIX_SECURE").build()
+        val nom = User.withUsername("nom").password("{noop}1111").authorities("MYPREFIX_ADMIN", "MYPREFIX_SECURE").build()
         return InMemoryUserDetailsManager(user, db, admin, nom)
+    }
+
+    @Bean
+    fun grantedAuthorityDefaults(): GrantedAuthorityDefaults {
+        return GrantedAuthorityDefaults("MYPREFIX_")
     }
 }
