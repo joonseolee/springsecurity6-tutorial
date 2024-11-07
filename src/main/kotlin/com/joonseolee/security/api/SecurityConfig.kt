@@ -24,9 +24,7 @@ class SecurityConfig {
         http
             .authorizeHttpRequests {
                 it
-                    .requestMatchers("/user").hasRole("USER")
                     .requestMatchers("/db").hasRole("DB")
-                    .requestMatchers("/admin").hasRole("ADMIN")
                     .anyRequest().authenticated()
             }
             .formLogin(Customizer.withDefaults())

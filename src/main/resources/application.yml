@@ -1,3 +1,7 @@
 spring:
   application:
     name: springsecurity6-tutorial
+
+logging:
+  level:
+    org.springframework.security: DEBUG

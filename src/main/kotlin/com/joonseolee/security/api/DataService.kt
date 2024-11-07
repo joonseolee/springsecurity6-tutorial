@@ -37,12 +37,10 @@ class DataService {
         )
     }
 
-    @PreAuthorize(value = "hasRole('USER')")
     fun getUser(): String {
         return "user"
     }
 
-    @PostAuthorize(value = "hasRole('USER')")
     fun getOwner(name: String): Account {
         return Account(name, false)
     }
