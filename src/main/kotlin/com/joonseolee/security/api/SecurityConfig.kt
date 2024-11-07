@@ -1,11 +1,15 @@
 package com.joonseolee.security.api
 
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl
+import org.springframework.security.authentication.AuthenticationEventPublisher
 import org.springframework.security.authentication.AuthenticationManager
+import org.springframework.security.authorization.AuthorizationEventPublisher
+import org.springframework.security.authorization.SpringAuthorizationEventPublisher
 import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -24,7 +28,9 @@ class SecurityConfig {
         http
             .authorizeHttpRequests {
                 it
+                    .requestMatchers("/user").hasRole("USER")
                     .requestMatchers("/db").hasRole("DB")
+                    .requestMatchers("/admin").hasRole("ADMIN")
                     .anyRequest().authenticated()
             }
             .formLogin(Customizer.withDefaults())
@@ -34,6 +40,14 @@ class SecurityConfig {
             }
 
         return http.build()
+    }
+
+    /**
+     * event 처리할때 필수 bean
+     */
+    @Bean
+    fun authorizationEventPublisher(applicationEventPublisher: ApplicationEventPublisher): AuthorizationEventPublisher {
+        return SpringAuthorizationEventPublisher(applicationEventPublisher)
     }
 
     @Bean
