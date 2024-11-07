@@ -1,6 +1,8 @@
 package com.joonseolee.security.api
 
 import com.joonseolee.security.service.SecurityContextService
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RestController
@@ -72,5 +74,23 @@ class IndexController(
     @GetMapping("/display")
     fun display(): String {
         return dataService.display()
+    }
+
+    @GetMapping("/users")
+    fun users(request: HttpServletRequest, response: HttpServletResponse): List<MemberDto> {
+        val authenticate = request.authenticate(response)
+        if (authenticate) {
+            return listOf(MemberDto("user", "1111"))
+        }
+
+        return listOf()
+    }
+
+    @GetMapping("/login")
+    fun login(request: HttpServletRequest, memberDto: MemberDto): String {
+        request.login(memberDto.name, memberDto.password)
+        println("login success!")
+
+        return "login"
     }
 }
