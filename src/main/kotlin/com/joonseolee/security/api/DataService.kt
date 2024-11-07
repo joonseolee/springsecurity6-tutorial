@@ -1,6 +1,8 @@
 package com.joonseolee.security.api
 
+import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PostFilter
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.access.prepost.PreFilter
 import org.springframework.stereotype.Service
 
@@ -33,5 +35,19 @@ class DataService {
             Pair("db", Account("db", false)),
             Pair("admin", Account("admin", false))
         )
+    }
+
+    @PreAuthorize(value = "hasRole('USER')")
+    fun getUser(): String {
+        return "user"
+    }
+
+    @PostAuthorize(value = "hasRole('USER')")
+    fun getOwner(name: String): Account {
+        return Account(name, false)
+    }
+
+    fun display(): String {
+        return "display"
     }
 }

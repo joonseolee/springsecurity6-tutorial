@@ -4,10 +4,12 @@ import com.joonseolee.security.service.SecurityContextService
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RestController
+import kotlin.reflect.jvm.internal.impl.descriptors.Visibilities.Private
 
 @RestController
 class IndexController(
-    private val securityContextService: SecurityContextService
+    private val securityContextService: SecurityContextService,
+    private val dataService: DataService
 ) {
     @GetMapping
     fun index(): String {
@@ -46,10 +48,6 @@ class IndexController(
         return "oauth"
     }
 
-    @GetMapping("/user")
-    fun user(): String {
-        return "user"
-    }
 
     @GetMapping("/db")
     fun db(): String {
@@ -59,5 +57,20 @@ class IndexController(
     @GetMapping("/admin")
     fun adminP(): String {
         return "adminP"
+    }
+
+    @GetMapping("/user")
+    fun user(): String {
+        return dataService.getUser()
+    }
+
+    @GetMapping("/owner")
+    fun owner(name: String): Account {
+        return dataService.getOwner(name)
+    }
+
+    @GetMapping("/display")
+    fun display(): String {
+        return dataService.display()
     }
 }
