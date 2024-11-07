@@ -3,6 +3,11 @@ package com.joonseolee.security.api
 import com.joonseolee.security.service.SecurityContextService
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.springframework.security.authentication.AuthenticationTrustResolver
+import org.springframework.security.authentication.AuthenticationTrustResolverImpl
+import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.core.userdetails.User
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RestController
@@ -13,11 +18,17 @@ class IndexController(
     private val securityContextService: SecurityContextService,
     private val dataService: DataService
 ) {
+
+    private val trustResolver: AuthenticationTrustResolver = AuthenticationTrustResolverImpl()
+
     @GetMapping
     fun index(): String {
-        println(securityContextService.getSecurityContext())
+        val authentication = SecurityContextHolder.getContextHolderStrategy().context.authentication
+        if (trustResolver.isAnonymous(authentication)) {
+            return "anonymous"
+        }
 
-        return "index"
+        return "authenticated"
     }
 
     @GetMapping("/loginPage")
@@ -62,8 +73,23 @@ class IndexController(
     }
 
     @GetMapping("/user")
-    fun user(): String {
-        return dataService.getUser()
+    fun user(@AuthenticationPrincipal user: User): User {
+        return user
+    }
+
+    @GetMapping("/user/name")
+    fun userDetail(@AuthenticationPrincipal(expression = "username") username: String): String {
+        return username
+    }
+
+    @GetMapping("/current-user")
+    fun currentUser(@CurrentUser user: User): User {
+        return user
+    }
+
+    @GetMapping("/current-user/name")
+    fun currentUsername(@CurrentUsername username: String): String {
+        return username
     }
 
     @GetMapping("/owner")
