@@ -4,6 +4,7 @@ plugins {
 	id 'org.springframework.boot' version '3.3.5'
 	id 'io.spring.dependency-management' version '1.1.6'
 	id 'org.jetbrains.kotlin.plugin.jpa' version '1.9.25'
+	id 'org.jetbrains.kotlin.kapt' version '2.0.21'
 }
 
 group = 'com.joonseolee'
@@ -27,13 +28,15 @@ dependencies {
 	implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
 	implementation 'org.jetbrains.kotlin:kotlin-reflect'
 	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
-	implementation 'org.modelmapper:modelmapper:3.1.0'
+	implementation 'org.mapstruct:mapstruct:1.5.3.Final'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	runtimeOnly 'org.postgresql:postgresql'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.jetbrains.kotlin:kotlin-test-junit5'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	kapt 'org.mapstruct:mapstruct-processor:1.5.3.Final'
 }
 
 kotlin {
@@ -50,4 +53,11 @@ allOpen {
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+kapt {
+	correctErrorTypes = true
+//	arguments {
+//		arg("mapstruct.defaultComponentModel", )
+//	}
 }

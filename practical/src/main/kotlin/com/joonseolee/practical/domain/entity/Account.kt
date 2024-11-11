@@ -1,4 +1,4 @@
-package com.joonseolee.practical.domain.dto
+package com.joonseolee.practical.domain.entity
 
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue

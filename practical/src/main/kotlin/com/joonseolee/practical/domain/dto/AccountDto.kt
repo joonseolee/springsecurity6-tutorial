@@ -1,7 +1,7 @@
-package com.joonseolee.practical.domain.entity
+package com.joonseolee.practical.domain.dto
 
 data class AccountDto(
-    val id: String?,
+    val id: Long?,
     val username: String,
     val password: String,
     val age: Int,

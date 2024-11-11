@@ -1,9 +1,8 @@
 package com.joonseolee.practical.controller
 
-import com.joonseolee.practical.domain.dto.Account
-import com.joonseolee.practical.domain.entity.AccountDto
+import com.joonseolee.practical.domain.dto.AccountDto
+import com.joonseolee.practical.mapper.UserMapper
 import com.joonseolee.practical.service.UserService
-import org.modelmapper.ModelMapper
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.PostMapping
@@ -15,8 +14,7 @@ class UserController(
 ) {
     @PostMapping("/signup")
     fun signup(accountDto: AccountDto): String {
-        val mapper = ModelMapper()
-        val account = mapper.map(accountDto, Account::class.java)
+        val account = UserMapper.INSTANCE.toAccount(accountDto)
         account.password = passwordEncoder.encode(accountDto.password)
         userService.createUser(account)
 

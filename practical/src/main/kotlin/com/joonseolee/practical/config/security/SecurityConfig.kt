@@ -14,7 +14,9 @@ import org.springframework.security.web.SecurityFilterChain
 
 @EnableWebSecurity
 @Configuration
-class SecurityConfig {
+class SecurityConfig(
+    private val formUserDetailsService: UserDetailsService
+) {
 
     @Bean
     @Throws(Exception::class)
@@ -30,6 +32,9 @@ class SecurityConfig {
                 it
                     .loginPage("/login").permitAll()
             }
+            .userDetailsService {
+                formUserDetailsService.loadUserByUsername(it)
+            }
 
         return http.build()
     }
@@ -37,11 +42,5 @@ class SecurityConfig {
     @Bean
     fun passwordEncoder(): PasswordEncoder {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder()
-    }
-
-    @Bean
-    fun userDetailsService(): UserDetailsService {
-        val user: UserDetails = User.withUsername("user").password("{noop}1111").roles("USER").build()
-        return InMemoryUserDetailsManager(user)
     }
 }
