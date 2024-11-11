@@ -1,0 +1,36 @@
+package com.joonseolee.security.api.method
+
+import org.aopalliance.intercept.MethodInterceptor
+import org.aopalliance.intercept.MethodInvocation
+import org.springframework.aop.Advisor
+import org.springframework.aop.Pointcut
+import org.springframework.aop.aspectj.AspectJExpressionPointcut
+import org.springframework.aop.support.DefaultPointcutAdvisor
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.security.authorization.AuthenticatedAuthorizationManager
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
+
+@EnableMethodSecurity(prePostEnabled = false)
+@Configuration
+class MethodSecurityConfig {
+
+    @Bean
+    fun methodInterceptor(): MethodInterceptor {
+        val authorizationManager = AuthenticatedAuthorizationManager<MethodInvocation>()
+        return CustomMethodInterceptor(authorizationManager)
+    }
+
+    @Bean
+    fun pointcut(): Pointcut {
+        val aspectJExpressionPointcut = AspectJExpressionPointcut()
+        aspectJExpressionPointcut.expression = "execution(* com.joonseolee.security.api.DataService.*(..))"
+
+        return aspectJExpressionPointcut
+    }
+
+    @Bean
+    fun serviceAdvisor(): Advisor {
+        return DefaultPointcutAdvisor(pointcut(), methodInterceptor());
+    }
+}

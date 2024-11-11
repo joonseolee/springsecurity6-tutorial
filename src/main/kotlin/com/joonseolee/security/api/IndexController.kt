@@ -1,18 +1,37 @@
 package com.joonseolee.security.api
 
 import com.joonseolee.security.service.SecurityContextService
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
+import org.springframework.security.authentication.AuthenticationTrustResolver
+import org.springframework.security.authentication.AuthenticationTrustResolverImpl
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.core.userdetails.User
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RestController
+import java.util.concurrent.Callable
+import kotlin.reflect.jvm.internal.impl.descriptors.Visibilities.Private
 
 @RestController
 class IndexController(
-    private val securityContextService: SecurityContextService
+    private val securityContextService: SecurityContextService,
+    private val dataService: DataService,
+    private val asyncService: AsyncService
 ) {
+
+    private val trustResolver: AuthenticationTrustResolver = AuthenticationTrustResolverImpl()
+
     @GetMapping
     fun index(): String {
-        println(securityContextService.getSecurityContext())
+        val authentication = SecurityContextHolder.getContextHolderStrategy().context.authentication
+        if (trustResolver.isAnonymous(authentication)) {
+            return "anonymous"
+        }
 
-        return "index"
+        return "authenticated"
     }
 
     @GetMapping("/loginPage")
@@ -23,5 +42,111 @@ class IndexController(
     @GetMapping("/home")
     fun home(): String {
         return "home"
+    }
+
+    @GetMapping("/custom")
+    fun custom(): String {
+        return "custom"
+    }
+
+    @GetMapping("/admin/db")
+    fun admin(): String {
+        return "admin"
+    }
+
+    @GetMapping("/api/photos")
+    fun photos(): String {
+        return "photos"
+    }
+
+    @GetMapping("/oauth/login")
+    fun oauth(): String {
+        return "oauth"
+    }
+
+
+    @GetMapping("/db")
+    fun db(): String {
+        return "db"
+    }
+
+    @GetMapping("/admin")
+    fun adminP(): String {
+        return "adminP"
+    }
+
+    @GetMapping("/user")
+    fun user(@AuthenticationPrincipal user: User): User {
+        return user
+    }
+
+    @GetMapping("/user/name")
+    fun userDetail(@AuthenticationPrincipal(expression = "username") username: String): String {
+        return username
+    }
+
+    @GetMapping("/current-user")
+    fun currentUser(@CurrentUser user: User): User {
+        return user
+    }
+
+    @GetMapping("/current-user/name")
+    fun currentUsername(@CurrentUsername username: String): String {
+        return username
+    }
+
+    @GetMapping("/owner")
+    fun owner(name: String): Account {
+        return dataService.getOwner(name)
+    }
+
+    @GetMapping("/display")
+    fun display(): String {
+        return dataService.display()
+    }
+
+    @GetMapping("/users")
+    fun users(request: HttpServletRequest, response: HttpServletResponse): List<MemberDto> {
+        val authenticate = request.authenticate(response)
+        if (authenticate) {
+            return listOf(MemberDto("user", "1111"))
+        }
+
+        return listOf()
+    }
+
+    @GetMapping("/login")
+    fun login(request: HttpServletRequest, memberDto: MemberDto): String {
+        request.login(memberDto.name, memberDto.password)
+        println("login success!")
+
+        return "login"
+    }
+
+    @GetMapping("/callable")
+    fun call(): Callable<Authentication> {
+        val context = SecurityContextHolder.getContextHolderStrategy().context
+
+        println("- securityContext: $context")
+        println("- parent thread: ${Thread.currentThread().name}")
+
+        return Callable<Authentication> {
+            val securityContext = SecurityContextHolder.getContextHolderStrategy().context
+
+            println("** securityContext: $securityContext")
+            println("** child thread: ${Thread.currentThread().name}")
+            securityContext.authentication
+        }
+    }
+
+    @GetMapping("/async")
+    fun async(): Authentication {
+        val context = SecurityContextHolder.getContextHolderStrategy().context
+        println("- securityContext: $context")
+        println("- async thread: ${Thread.currentThread().name}")
+
+        asyncService.asyncMethod()
+
+        return context.authentication
     }
 }

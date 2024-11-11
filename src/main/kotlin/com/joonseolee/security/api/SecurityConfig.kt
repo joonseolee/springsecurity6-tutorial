@@ -1,11 +1,16 @@
 package com.joonseolee.security.api
 
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.security.authentication.AuthenticationManager
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl
+import org.springframework.security.authorization.AuthorizationEventPublisher
+import org.springframework.security.authorization.SpringAuthorizationEventPublisher
 import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
+import org.springframework.security.config.core.GrantedAuthorityDefaults
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.provisioning.InMemoryUserDetailsManager
@@ -19,12 +24,39 @@ class SecurityConfig {
         http
             .authorizeHttpRequests {
                 it
-                    .requestMatchers("/").permitAll()
-                    .anyRequest().authenticated()
+                    .requestMatchers("/user").hasRole("USER")
+                    .requestMatchers("/db").hasRole("DB")
+                    .requestMatchers("/admin").hasRole("ADMIN")
+                    .anyRequest().permitAll()
             }
             .formLogin(Customizer.withDefaults())
+            .csrf {
+                it
+                    .disable()
+            }
+            .with(MyCustomDsl.customDsl()) {
+                it.setFlag(true)
+            }
 
         return http.build()
+    }
+
+    /**
+     * event 처리할때 필수 bean
+     */
+    @Bean
+    fun authorizationEventPublisher(applicationEventPublisher: ApplicationEventPublisher): AuthorizationEventPublisher {
+        return SpringAuthorizationEventPublisher(applicationEventPublisher)
+    }
+
+    @Bean
+    fun roleHierarchy(): RoleHierarchy {
+        return RoleHierarchyImpl().apply {
+            setHierarchy("MYPREFIX_ADMIN > MYPREFIX_DB\n" +
+                "MYPREFIX_DB > MYPREFIX_USER\n" +
+                "MYPREFIX_USER > MYPREFIX_ANONYMOUS"
+            )
+        }
     }
 
     /**
@@ -32,12 +64,15 @@ class SecurityConfig {
      */
     @Bean
     fun userDetailsService(): UserDetailsService {
-        val user =
-            User
-                .withUsername("user")
-                .password("{noop}1111")
-                .roles("USER").build()
+        val user = User.withUsername("user").password("{noop}1111").authorities("MYPREFIX_USER").build()
+        val db = User.withUsername("db").password("{noop}1111").authorities("MYPREFIX_DB").build()
+        val admin = User.withUsername("admin").password("{noop}1111").authorities("MYPREFIX_ADMIN", "MYPREFIX_SECURE").build()
+        val nom = User.withUsername("nom").password("{noop}1111").authorities("MYPREFIX_ADMIN", "MYPREFIX_SECURE").build()
+        return InMemoryUserDetailsManager(user, db, admin, nom)
+    }
 
-        return InMemoryUserDetailsManager(user)
+    @Bean
+    fun grantedAuthorityDefaults(): GrantedAuthorityDefaults {
+        return GrantedAuthorityDefaults("MYPREFIX_")
     }
 }
