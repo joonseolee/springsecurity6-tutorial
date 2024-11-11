@@ -3,15 +3,11 @@ package com.joonseolee.security.api
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.core.annotation.Order
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl
-import org.springframework.security.authentication.AuthenticationEventPublisher
-import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authorization.AuthorizationEventPublisher
 import org.springframework.security.authorization.SpringAuthorizationEventPublisher
 import org.springframework.security.config.Customizer
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.core.GrantedAuthorityDefaults
@@ -37,6 +33,9 @@ class SecurityConfig {
             .csrf {
                 it
                     .disable()
+            }
+            .with(MyCustomDsl.customDsl()) {
+                it.setFlag(true)
             }
 
         return http.build()
