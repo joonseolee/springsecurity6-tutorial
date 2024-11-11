@@ -5,18 +5,21 @@ import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.security.authentication.AuthenticationTrustResolver
 import org.springframework.security.authentication.AuthenticationTrustResolverImpl
+import org.springframework.security.core.Authentication
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.User
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RestController
+import java.util.concurrent.Callable
 import kotlin.reflect.jvm.internal.impl.descriptors.Visibilities.Private
 
 @RestController
 class IndexController(
     private val securityContextService: SecurityContextService,
-    private val dataService: DataService
+    private val dataService: DataService,
+    private val asyncService: AsyncService
 ) {
 
     private val trustResolver: AuthenticationTrustResolver = AuthenticationTrustResolverImpl()
@@ -118,5 +121,32 @@ class IndexController(
         println("login success!")
 
         return "login"
+    }
+
+    @GetMapping("/callable")
+    fun call(): Callable<Authentication> {
+        val context = SecurityContextHolder.getContextHolderStrategy().context
+
+        println("- securityContext: $context")
+        println("- parent thread: ${Thread.currentThread().name}")
+
+        return Callable<Authentication> {
+            val securityContext = SecurityContextHolder.getContextHolderStrategy().context
+
+            println("** securityContext: $securityContext")
+            println("** child thread: ${Thread.currentThread().name}")
+            securityContext.authentication
+        }
+    }
+
+    @GetMapping("/async")
+    fun async(): Authentication {
+        val context = SecurityContextHolder.getContextHolderStrategy().context
+        println("- securityContext: $context")
+        println("- async thread: ${Thread.currentThread().name}")
+
+        asyncService.asyncMethod()
+
+        return context.authentication
     }
 }
