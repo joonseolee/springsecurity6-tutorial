@@ -11,4 +11,9 @@ class LoginController {
     fun login(): String {
         return "login/login"
     }
+
+    @GetMapping(value = ["/signup"])
+    fun signup(): String {
+        return "login/signup"
+    }
 }
