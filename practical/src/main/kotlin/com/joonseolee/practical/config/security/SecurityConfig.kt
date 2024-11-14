@@ -29,6 +29,9 @@ class SecurityConfig(
                 it
                     .requestMatchers("/css/**", "/images/**", "/js/**", "/favicon.*", "/*/icon-*").permitAll()
                     .requestMatchers("/", "/signup", "/login*").permitAll()
+                    .requestMatchers("/user").hasAuthority("ROLE_USER")
+                    .requestMatchers("/manager").hasAuthority("ROLE_MANAGER")
+                    .requestMatchers("/admin").hasAuthority("ROLE_ADMIN")
                     .anyRequest().authenticated()
             }
             .formLogin {
@@ -39,6 +42,10 @@ class SecurityConfig(
                     .failureHandler(failureHandler)
             }
             .authenticationProvider(formAuthenticationProvider)
+            .exceptionHandling {
+                it
+                    .accessDeniedHandler(FormAccessDeniedHandler("/denied"))
+            }
 
         return http.build()
     }
