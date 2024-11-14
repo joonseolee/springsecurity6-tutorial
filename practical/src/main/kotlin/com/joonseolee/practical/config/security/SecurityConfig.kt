@@ -7,8 +7,6 @@ import org.springframework.security.authentication.AuthenticationDetailsSource
 import org.springframework.security.authentication.AuthenticationProvider
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
-import org.springframework.security.crypto.factory.PasswordEncoderFactories
-import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.WebAuthenticationDetails
 
@@ -16,7 +14,8 @@ import org.springframework.security.web.authentication.WebAuthenticationDetails
 @Configuration
 class SecurityConfig(
     private val formAuthenticationProvider: AuthenticationProvider,
-    private val formAuthenticationDetailsSource: AuthenticationDetailsSource<HttpServletRequest, WebAuthenticationDetails>
+    private val formAuthenticationDetailsSource: AuthenticationDetailsSource<HttpServletRequest, WebAuthenticationDetails>,
+    private val successHandler: FormAuthenticationSuccessHandler,
 ) {
 
     @Bean
@@ -33,6 +32,7 @@ class SecurityConfig(
                 it
                     .loginPage("/login").permitAll()
                     .authenticationDetailsSource(formAuthenticationDetailsSource)
+                    .successHandler(successHandler)
             }
             .authenticationProvider(formAuthenticationProvider)
 
