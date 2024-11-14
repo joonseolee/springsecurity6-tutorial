@@ -1,5 +1,6 @@
 package com.joonseolee.practical.config.security
 
+import com.joonseolee.practical.config.security.exception.SecretException
 import com.joonseolee.practical.domain.dto.AccountContext
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.authentication.AuthenticationProvider
@@ -22,6 +23,11 @@ class FormAuthenticationProvider(
 
         if (!passwordEncoder.matches(password, accountContext.password)) {
             throw BadCredentialsException("Invalid password")
+        }
+
+        val formAuthenticationDetails = authentication.details as FormAuthenticationDetails
+        if (formAuthenticationDetails.secretKey == null || formAuthenticationDetails.secretKey != "secret") {
+            throw SecretException("Invalid secret")
         }
 
         return UsernamePasswordAuthenticationToken(accountContext.accountDto, null, accountContext.authorities)
