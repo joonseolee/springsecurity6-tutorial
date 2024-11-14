@@ -8,6 +8,8 @@ import org.springframework.security.authentication.AuthenticationProvider
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.authentication.AuthenticationFailureHandler
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler
 import org.springframework.security.web.authentication.WebAuthenticationDetails
 
 @EnableWebSecurity
@@ -15,7 +17,8 @@ import org.springframework.security.web.authentication.WebAuthenticationDetails
 class SecurityConfig(
     private val formAuthenticationProvider: AuthenticationProvider,
     private val formAuthenticationDetailsSource: AuthenticationDetailsSource<HttpServletRequest, WebAuthenticationDetails>,
-    private val successHandler: FormAuthenticationSuccessHandler,
+    private val successHandler: AuthenticationSuccessHandler,
+    private val failureHandler: AuthenticationFailureHandler,
 ) {
 
     @Bean
@@ -25,7 +28,7 @@ class SecurityConfig(
             .authorizeHttpRequests {
                 it
                     .requestMatchers("/css/**", "/images/**", "/js/**", "/favicon.*", "/*/icon-*").permitAll()
-                    .requestMatchers("/", "/signup").permitAll()
+                    .requestMatchers("/", "/signup", "/login*").permitAll()
                     .anyRequest().authenticated()
             }
             .formLogin {
@@ -33,6 +36,7 @@ class SecurityConfig(
                     .loginPage("/login").permitAll()
                     .authenticationDetailsSource(formAuthenticationDetailsSource)
                     .successHandler(successHandler)
+                    .failureHandler(failureHandler)
             }
             .authenticationProvider(formAuthenticationProvider)
 
