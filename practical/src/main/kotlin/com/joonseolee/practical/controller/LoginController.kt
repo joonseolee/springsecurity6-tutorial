@@ -25,6 +25,11 @@ class LoginController {
         return "login/login"
     }
 
+    @GetMapping(value = ["/api/login"])
+    fun restLogin(): String {
+        return "rest/login"
+    }
+
     @GetMapping(value = ["/signup"])
     fun signup(): String {
         return "login/signup"
